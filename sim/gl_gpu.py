@@ -56,13 +56,15 @@ class GLBilayer:
     def __init__(s, p, L=128, dt=0.5, seed=0, init='noise', stab=0.0):
         """stab: S in the stabilised splitting (1+2dt(L+S)) m' = m - dt (N(m) - 2 S m); fixed points are unchanged
         (S=0 is the reference scheme). Use S ~ kappa*|r| to allow dt >> 1/(12|r|)."""
+        s.Lx, s.Ly = (L, L) if np.isscalar(L) else tuple(L)   # L may be an int (square) or (Lx, Ly)
+        L = s.Lx
         s.p, s.L, s.dt, s.stab = dict(p), L, dt, float(stab)
-        k = 2 * np.pi * np.fft.fftfreq(L)
-        kr = 2 * np.pi * np.fft.rfftfreq(L)
-        s.qx, s.qy = np.meshgrid(k, kr, indexing='ij')       # (L, L//2+1)
+        k = 2 * np.pi * np.fft.fftfreq(s.Lx)
+        kr = 2 * np.pi * np.fft.rfftfreq(s.Ly)
+        s.qx, s.qy = np.meshgrid(k, kr, indexing='ij')       # (Lx, Ly//2+1)
         s.build()
         rng = np.random.default_rng(seed)
-        m = 1e-3 * rng.normal(size=(6, L, L))
+        m = 1e-3 * rng.normal(size=(6, s.Lx, s.Ly))
         if init == 'noise':
             m[2] += p['M_target']; m[5] += p['M_target']
         s.m = xp.asarray(m)
@@ -75,7 +77,7 @@ class GLBilayer:
         s.Ainv = xp.asarray(Ai)
         # weights for rfft energy sum (columns 0 and L/2 counted once, others twice)
         w = np.full(s.qx.shape[1], 2.0); w[0] = 1.0
-        if s.L % 2 == 0: w[-1] = 1.0
+        if s.Ly % 2 == 0: w[-1] = 1.0
         s.w = xp.asarray(w)[None, :]
 
     def set_fields(s, H1, H2):
@@ -90,16 +92,15 @@ class GLBilayer:
         return g
 
     def step(s, n=1):
-        L = s.L
         for _ in range(n):
             mh = xp.fft.rfft2(s.m, axes=(1, 2))
             nh = xp.fft.rfft2(s.nonlin(s.m), axes=(1, 2))
             rhs = xp.moveaxis(mh * (1 + 2 * s.dt * s.stab) - s.dt * nh, 0, -1)
             out = xp.matmul(s.Ainv, rhs[..., None])[..., 0]
-            s.m = xp.fft.irfft2(xp.moveaxis(out, -1, 0), s=(L, L), axes=(1, 2))
+            s.m = xp.fft.irfft2(xp.moveaxis(out, -1, 0), s=(s.Lx, s.Ly), axes=(1, 2))
 
     def energy(s):
-        N = s.L * s.L
+        N = s.Lx * s.Ly
         mh = xp.moveaxis(xp.fft.rfft2(s.m, axes=(1, 2)), 0, -1)
         Lm = xp.matmul(s.Lq, mh[..., None])[..., 0]
         e2 = float(xp.real((xp.conj(mh) * Lm).sum(-1) * s.w).sum()) / N

@@ -1,0 +1,12 @@
+## P3
+band-minimum ratio R = q+/q- = 1.9316
+V    E = -0.45803
+T-   E = -0.98276
+T+   E = -1.16330
+HEX3 E = -2.67525   Q1 = 0.9747 x q-   ring amplitudes (1, sqrt3, 2) = [-0.6519 -0.0942 -0.6121]  (signs matter)
+## P4
+band-minimum ratio R = q+/q- = 1.7319
+V    E = -0.48613
+T-   E = -0.68126
+T+   E = -0.67105
+HEX3 E = -3.45588   Q1 = 0.9999 x q-   ring amplitudes (1, sqrt3, 2) = [-7.154e-01 -7.030e-01 -7.000e-04]  (signs matter)

@@ -7,24 +7,29 @@ Energy scale: (energy per site)/(|r|^2/u) = Landau F.
 import numpy as np
 
 # ---------------------------------------------------------------- seeds
+def _dims(L):
+    """L may be an int (square box) or a pair (Lx, Ly)"""
+    return (int(L), int(L)) if np.isscalar(L) else (int(L[0]), int(L[1]))
+
+
 def _round_k(k, L):
     """nearest box wavevector (integer pair) to a continuous k (rad/site)"""
-    n = np.rint(np.asarray(k) * L / (2 * np.pi)).astype(int)
-    return n
+    Lx, Ly = _dims(L)
+    return np.rint(np.asarray(k) * np.array([Lx, Ly]) / (2 * np.pi)).astype(int)
 
 
 def cycloid_seed(modes, L, p, s_layer):
     """Field from modes=[(k(2) continuous, amp_landau)], amplitude in units sqrt(|r|/u).
     Layer weights s_layer(scale)->(w_layer1, w_layer2); `modes` entries are (k, amp, scale). Phases all zero
     (all amplitudes negative => triad phase sum pi, REQUEST sec. 4)."""
-    x = np.arange(L)
-    X, Y = np.meshgrid(x, x, indexing='ij')
-    m = np.zeros((6, L, L))
+    Lx, Ly = _dims(L)
+    X, Y = np.meshgrid(np.arange(Lx), np.arange(Ly), indexing='ij')
+    m = np.zeros((6, Lx, Ly))
     base = np.sqrt(p['r_abs'] / p['u'])
     used = {}
     for k, a, sc in modes:
         n = _round_k(k, L)
-        kk = 2 * np.pi * n / L
+        kk = 2 * np.pi * n / np.array([Lx, Ly])
         kn = np.hypot(*kk)
         if kn == 0:
             continue
@@ -79,8 +84,7 @@ def hex_seed(p, L, a1=0.65, a_sh=0.25, amp_sign=-1.0):
 # ---------------------------------------------------------------- observables
 def structure_factors(m, mean_subtract=True):
     """S_i(q) for both layers, (2,L,L) float64 on the fftfreq grid."""
-    L = m.shape[-1]
-    S = np.zeros((2, L, L))
+    S = np.zeros((2,) + m.shape[1:])
     for i in range(2):
         for a in range(3):
             f = m[3 * i + a]
@@ -107,8 +111,8 @@ def find_peaks(m, p, nmax=80, rel=2e-4):
     """peaks of total S(q) (half plane: one of each +-k). Returns list of dicts sorted by amplitude:
     n=(nx,ny) integer box coordinates, k, angle (deg, in [0,180)), a_i (layer amplitudes), a (mode amplitude),
     a_landau = a/sqrt(|r|/u)."""
-    L = m.shape[-1]
-    N = L * L
+    Lx, Ly = m.shape[1], m.shape[2]
+    N = Lx * Ly
     mh = np.fft.fft2(m, axes=(1, 2))
     S = (np.abs(mh) ** 2)
     S = S[0:3].sum(0) + S[3:6].sum(0)
@@ -121,12 +125,12 @@ def find_peaks(m, p, nmax=80, rel=2e-4):
                 loc &= S >= np.roll(np.roll(S, dx, 0), dy, 1)
     thr = rel * S.max()
     idx = np.argwhere(loc & (S > thr))
-    nvec = np.fft.fftfreq(L, 1.0 / L).astype(int)
+    nvx = np.fft.fftfreq(Lx, 1.0 / Lx).astype(int); nvy = np.fft.fftfreq(Ly, 1.0 / Ly).astype(int)
     peaks = []
     seen = set()
     base = np.sqrt(p['r_abs'] / p['u'])
     for ix, iy in idx:
-        n = (int(nvec[ix]), int(nvec[iy]))
+        n = (int(nvx[ix]), int(nvy[iy]))
         key = n if (n[0] > 0 or (n[0] == 0 and n[1] > 0)) else (-n[0], -n[1])
         if key in seen:
             continue
@@ -134,9 +138,9 @@ def find_peaks(m, p, nmax=80, rel=2e-4):
         ai = [2 * abs(mh[3 * i + 2, ix, iy]) / N for i in range(2)]
         # in-plane (cycloid) components consistent check: total amplitude from all 3 comps
         a = float(np.hypot(*ai))
-        k = 2 * np.pi * np.array(key) / L
-        peaks.append(dict(n=key, k=float(np.hypot(*k)), kn=float(np.hypot(*key)),
-                          angle=float(np.degrees(np.arctan2(key[1], key[0])) % 180),
+        k = 2 * np.pi * np.array(key) / np.array([Lx, Ly])
+        peaks.append(dict(n=key, k=float(np.hypot(*k)), kn=float(np.hypot(*k) * Lx / (2 * np.pi)),
+                          angle=float(np.degrees(np.arctan2(k[1], k[0])) % 180),
                           a1=float(ai[0]), a2=float(ai[1]), a=a, a_landau=a / base, S=float(S[ix, iy])))
     peaks.sort(key=lambda d: -d['a'])
     return peaks[:nmax]
@@ -279,7 +283,8 @@ def qc_int_modes(p, L, amps=(0.607, 0.148, 0.619, 0.132), width=3.0):
 def int_seed(modes, L, p, c_rel, amp_sign=-1.0):
     """field from integer-vector modes [(n, amp_landau, scale)] (phases 0, amplitudes negative)."""
     W = layer_weights(c_rel)
-    kmodes = [(2 * np.pi * np.asarray(n, float) / L, amp_sign * a, sc) for n, a, sc in modes]
+    Lx, Ly = _dims(L)
+    kmodes = [(2 * np.pi * np.asarray(n, float) / np.array([Lx, Ly]), amp_sign * a, sc) for n, a, sc in modes]
     return cycloid_seed(kmodes, L, p, lambda sc: W[sc])
 
 
@@ -287,14 +292,16 @@ def eig_spiral_seed(p, L, specs, band=0):
     """Seeds built from the exact lowest eigenvector of the 6x6 kernel at each box wavevector.
     specs = [((nx, ny), amp_landau)]; m = base*amp*sqrt(2)*Re[v exp(i k r)] (|v|=1)."""
     from params import kernel
-    x = np.arange(L)
-    X, Y = np.meshgrid(x, x, indexing='ij')
-    m = np.zeros((6, L, L))
+    Lx, Ly = _dims(L)
+    X, Y = np.meshgrid(np.arange(Lx), np.arange(Ly), indexing='ij')
+    m = np.zeros((6, Lx, Ly))
     base = np.sqrt(p['r_abs'] / p['u'])
     for n, a in specs:
-        k = 2 * np.pi * np.asarray(n, float) / L
+        k = 2 * np.pi * np.asarray(n, float) / np.array([Lx, Ly])
         w, V = np.linalg.eigh(kernel(p, k[0], k[1]))
         v = V[:, band]
+        j = int(np.argmax(np.abs(v[[2, 5]])))          # gauge: z component of the dominant layer real and positive
+        v = v * np.exp(-1j * np.angle(v[2 + 3 * j]))
         ph = np.exp(1j * (k[0] * X + k[1] * Y))
         for j in range(6):
             m[j] += base * a * np.sqrt(2) * np.real(v[j] * ph)

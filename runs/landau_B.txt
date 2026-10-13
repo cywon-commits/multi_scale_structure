@@ -1,0 +1,18 @@
+## 0.95 2 150 0.8
+band-minimum ratio R = q+/q- = 1.2324
+V    E = -0.47853
+T-   E = -0.52367
+T+   E = -0.53018
+HEX3 E = -0.49043   Q1 = 0.5820 x q-   ring amplitudes (1, sqrt3, 2) = [-0.     -0.5414 -0.    ]  (signs matter)
+## 0.95 2 150 0.5
+band-minimum ratio R = q+/q- = 1.2324
+V    E = -0.47853
+T-   E = -0.45769
+T+   E = -0.46481
+HEX3 E = -0.41856   Q1 = 0.5817 x q-   ring amplitudes (1, sqrt3, 2) = [ 0.     -0.5114  0.    ]  (signs matter)
+## 0.95 2 150 0.6
+band-minimum ratio R = q+/q- = 1.2324
+V    E = -0.47853
+T-   E = -0.47475
+T+   E = -0.48376
+HEX3 E = -0.44116   Q1 = 0.5818 x q-   ring amplitudes (1, sqrt3, 2) = [-0.     -0.5212  0.    ]  (signs matter)

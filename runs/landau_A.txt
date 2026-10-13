@@ -1,0 +1,66 @@
+## 0.5 2.0 50 0
+band-minimum ratio R = q+/q- = 1.8117
+V    E = -0.46724
+T-   E = -0.44893
+T+   E = -0.46849
+Traceback (most recent call last):
+  File "/home/user/multi_scale_structure/landau/minimal_states.py", line 34, in <module>
+    print(f'HEX3 E = {E: .5f}   Q1 = {f:.4f} x q-   ring amplitudes (1, sqrt3, 2) = {np.round(a,4)}  (signs matter)')
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+BrokenPipeError: [Errno 32] Broken pipe
+nonres:2x1q-perp -0.47062
+## 0.55 2.0 50 0
+band-minimum ratio R = q+/q- = 1.7716
+V    E = -0.46239
+T-   E = -0.44055
+T+   E = -0.46226
+Traceback (most recent call last):
+  File "/home/user/multi_scale_structure/landau/minimal_states.py", line 34, in <module>
+    print(f'HEX3 E = {E: .5f}   Q1 = {f:.4f} x q-   ring amplitudes (1, sqrt3, 2) = {np.round(a,4)}  (signs matter)')
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+BrokenPipeError: [Errno 32] Broken pipe
+nonres:2x1q-perp -0.46489
+## 0.6 2.0 50 0
+band-minimum ratio R = q+/q- = 1.7273
+V    E = -0.45833
+T-   E = -0.43211
+T+   E = -0.45557
+Traceback (most recent call last):
+  File "/home/user/multi_scale_structure/landau/minimal_states.py", line 34, in <module>
+    print(f'HEX3 E = {E: .5f}   Q1 = {f:.4f} x q-   ring amplitudes (1, sqrt3, 2) = {np.round(a,4)}  (signs matter)')
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+BrokenPipeError: [Errno 32] Broken pipe
+nonres:2x1q-perp -0.45878
+## 0.65 2.0 50 0
+band-minimum ratio R = q+/q- = 1.6785
+V    E = -0.45611
+T-   E = -0.42373
+T+   E = -0.44844
+Traceback (most recent call last):
+  File "/home/user/multi_scale_structure/landau/minimal_states.py", line 34, in <module>
+    print(f'HEX3 E = {E: .5f}   Q1 = {f:.4f} x q-   ring amplitudes (1, sqrt3, 2) = {np.round(a,4)}  (signs matter)')
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+BrokenPipeError: [Errno 32] Broken pipe
+nonres:2x1q-perp -0.45232
+## 0.7 2.0 50 0
+band-minimum ratio R = q+/q- = 1.6248
+V    E = -0.45774
+T-   E = -0.41552
+T+   E = -0.44088
+Traceback (most recent call last):
+  File "/home/user/multi_scale_structure/landau/minimal_states.py", line 34, in <module>
+    print(f'HEX3 E = {E: .5f}   Q1 = {f:.4f} x q-   ring amplitudes (1, sqrt3, 2) = {np.round(a,4)}  (signs matter)')
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+BrokenPipeError: [Errno 32] Broken pipe
+nonres:2x1q-perp -0.44554
+## 0.8 2.0 50 0
+band-minimum ratio R = q+/q- = 1.5000
+V    E = -0.46389
+T-   E = -0.40001
+T+   E = -0.42454
+Traceback (most recent call last):
+  File "/home/user/multi_scale_structure/landau/minimal_states.py", line 34, in <module>
+    print(f'HEX3 E = {E: .5f}   Q1 = {f:.4f} x q-   ring amplitudes (1, sqrt3, 2) = {np.round(a,4)}  (signs matter)')
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+BrokenPipeError: [Errno 32] Broken pipe
+nonres:2x1q-perp -0.43120
