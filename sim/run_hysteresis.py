@@ -27,7 +27,7 @@ def ring_metrics(m, p, rel=0.01):
 
 def settle(sim, p, tau_steps, nmax, tol, calib=True):
     if calib:
-        rp.calibrate(sim, p, 6, 1500, 250, verbose=False)
+        rp.calibrate(sim, p, 3, 750, 250, verbose=False)
         p['H1'], p['H2'] = sim.p['H1'], sim.p['H2']
     E, mono = rp.relax_checked(sim, nmax, 250, tol, p, verbose=False)
     return E, mono

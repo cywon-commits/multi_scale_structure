@@ -281,3 +281,21 @@ def int_seed(modes, L, p, c_rel, amp_sign=-1.0):
     W = layer_weights(c_rel)
     kmodes = [(2 * np.pi * np.asarray(n, float) / L, amp_sign * a, sc) for n, a, sc in modes]
     return cycloid_seed(kmodes, L, p, lambda sc: W[sc])
+
+
+def eig_spiral_seed(p, L, specs, band=0):
+    """Seeds built from the exact lowest eigenvector of the 6x6 kernel at each box wavevector.
+    specs = [((nx, ny), amp_landau)]; m = base*amp*sqrt(2)*Re[v exp(i k r)] (|v|=1)."""
+    from params import kernel
+    x = np.arange(L)
+    X, Y = np.meshgrid(x, x, indexing='ij')
+    m = np.zeros((6, L, L))
+    base = np.sqrt(p['r_abs'] / p['u'])
+    for n, a in specs:
+        k = 2 * np.pi * np.asarray(n, float) / L
+        w, V = np.linalg.eigh(kernel(p, k[0], k[1]))
+        v = V[:, band]
+        ph = np.exp(1j * (k[0] * X + k[1] * Y))
+        for j in range(6):
+            m[j] += base * a * np.sqrt(2) * np.real(v[j] * ph)
+    return m

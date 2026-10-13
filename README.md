@@ -46,3 +46,7 @@ cd ../landau && python predict_point.py 0.6 2.318 150 4   # 한 점의 Landau �
 
 ## `data/`
 `phase.json`(고정 공명비 격자 상도), `bd_*.json`/`curves.json`(정확 상경계), `rows_*.json`(정밀 격자), `te_*.json`/`tg_*.json`/`tdata.json`(잠금 혀), `kc_pts.json`/`marg_g4.json`(K 의존 여유 에너지). 스크립트는 현재 폴더에 결과를 쓰므로, 다시 만들 때는 `landau/`에서 실행한 뒤 옮기면 된다.
+
+
+## 시뮬레이션 결과 (추가)
+`report.md`가 의뢰서 단계 0–4의 결과 보고서이다. 코드: `sim/gl_gpu.py`(NumPy/CuPy GL 솔버), `sim/analysis.py`, `sim/run_point.py`, `sim/run_hysteresis.py`, `sim/make_tables.py`, `sim/make_figures.py`; 점별 설정 `configs/`, 원자료 `runs/`, 그림 `figures/`, 시험 `tests/test_step0.py`. 이 환경에는 GPU가 없어 CPU(NumPy)로만 돌렸다.

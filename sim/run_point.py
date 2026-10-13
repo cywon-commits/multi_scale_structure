@@ -35,6 +35,10 @@ def make_sim(p, L, tau, seed_kind, seed=0, m0=None, kappa=12.0):
         m = an.hex_seed(p, L) + 1e-4 * np.sqrt(p['r_abs']) * np.random.default_rng(seed).normal(size=(6, L, L))
         m[2] += p['M_target']; m[5] += p['M_target']
         sim.m = G.xp.asarray(m)
+    elif seed_kind in ('sp1', 'sp2', 'sp2c'):   # g=0 benchmarks: single spiral / two orthogonal / two collinear (exact kernel eigenvectors)
+        nm = int(round(p['q_minus'] * L / (2 * np.pi))); npl = int(round(p['q_plus'] * L / (2 * np.pi)))
+        specs = {'sp1': [((nm, 0), 1.0)], 'sp2': [((nm, 0), 1.0), ((0, npl), 1.0)], 'sp2c': [((nm, 0), 1.0), ((npl, 0), 1.0)]}[seed_kind]
+        sim.m = G.xp.asarray(an.eig_spiral_seed(p, L, specs) + noise)
     elif seed_kind == 'file':
         sim.m = G.xp.asarray(m0)
     return sim
