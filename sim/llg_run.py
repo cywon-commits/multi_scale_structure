@@ -66,3 +66,30 @@ def relax_state(A_, D1_, D2_, c, H, m0, Bx, By, nmax=8000, chunk=200, tol=1e-9, 
     sim.set_m(m0)
     E, mono = sim.relax(nmax=nmax, chunk=chunk, tol=tol, verbose=verbose)
     return sim, E, mono
+
+
+def _amp_at(peaks, kref, angle, tol_k=0.08, tol_ang=6.0):
+    """largest peak amplitude near (|k| = kref, line angle = angle mod 60 pattern: any of angle + 60 j)"""
+    best = 0.0
+    for p in peaks:
+        if abs(p['k'] / kref - 1) > tol_k: continue
+        d = ((p['angle'] - angle + 30) % 60) - 30
+        if abs(d) < tol_ang: best = max(best, p['a'])
+    return best
+
+
+def measure_triad2(peaks, qm, qp, phi_deg):
+    """REQUEST5 addendum: read the q- peak amplitudes at +phi and -phi from the big q- orbit (chi = +1 if +phi is occupied),
+    and the q+ orbit angle relative to the big q- orbit (expected +-phi/2 mod 60)."""
+    r1 = ring_orbits(peaks, qm)
+    if not r1: return None
+    th0 = r1['angle_mod60']
+    A0 = _amp_at(peaks, qm, th0); Ap = _amp_at(peaks, qm, th0 + phi_deg); Am = _amp_at(peaks, qm, th0 - phi_deg)
+    out = dict(theta0=th0, A_big=A0, A_plus_phi=Ap, A_minus_phi=Am)
+    out['chi'] = int(np.sign(Ap - Am)) if max(Ap, Am) > 2 * min(Ap, Am) + 1e-12 else 0
+    r2 = ring_orbits(peaks, qp)
+    if r2:
+        rel = ((r2['angle_mod60'] - th0 + 30) % 60) - 30
+        out['qp_orbit_rel_mod60'] = float(rel); out['qp_amp'] = r2['major']
+        out['expected_phi_half_mod60'] = [float(((phi_deg / 2 + 30) % 60) - 30), float(((-phi_deg / 2 + 30) % 60) - 30)]
+    return out

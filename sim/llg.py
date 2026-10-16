@@ -141,7 +141,7 @@ def spiral_energy_1d(q, A, D1, D2, c, H=0.0, N=48, nmax=6000, seed=0, init=None)
         m = np.zeros((6, N, 1))
         for i, D in enumerate((D1, D2)):
             qi = D / (2 * A)
-            m[3 * i + 0, :, 0] = np.sin(q * x); m[3 * i + 2, :, 0] = np.cos(q * x)       # cycloid at the box wavevector
+            m[3 * i + 0, :, 0] = -np.sin(q * x); m[3 * i + 2, :, 0] = np.cos(q * x)      # cycloid at the box wavevector (helicity selected by D>0)
         init = m + 1e-3 * np.random.default_rng(seed).normal(size=m.shape)
     sim.set_m(init)
     E, mono = sim.relax(nmax=nmax, chunk=200, tol=1e-12)
@@ -154,7 +154,7 @@ def collinear_pair_state(na, nb, B, N, D1=None, D2=None, phase=0.0, noise=1e-3, 
     m = np.zeros((6, N, 1))
     for o, n, ph in ((0, na, 0.0), (3, nb, phase)):
         th = 2 * np.pi * n * x / B + ph
-        m[o + 0, :, 0] = np.sin(th); m[o + 2, :, 0] = np.cos(th)
+        m[o + 0, :, 0] = -np.sin(th); m[o + 2, :, 0] = np.cos(th)
     return m + noise * np.random.default_rng(seed).normal(size=m.shape)
 
 
@@ -235,5 +235,5 @@ def modes_to_field(modes, Lx, Ly, Bx, By, m0=0.0, sign=-1.0):
         ph = k[0] * X + k[1] * Y
         for i in range(2):
             amp = sign * a * np.sqrt(w[i])
-            m[3 * i + 2] += amp * np.cos(ph); m[3 * i + 0] += amp * k[0] / kn * np.sin(ph); m[3 * i + 1] += amp * k[1] / kn * np.sin(ph)
+            m[3 * i + 2] += amp * np.cos(ph); m[3 * i + 0] -= amp * k[0] / kn * np.sin(ph); m[3 * i + 1] -= amp * k[1] / kn * np.sin(ph)
     return m
