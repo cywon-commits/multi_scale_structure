@@ -10,7 +10,8 @@ import llg, llg_run as lr
 A = 1.0; q1 = 2 * np.pi / 32; D1 = 2 * A * q1
 RUNS = os.path.join(os.path.dirname(__file__), '..', 'runs')
 RHO, J, HS = 1.5, 0.0022, 0.2314
-H = 0.3 * HS
+HFRAC = float(os.environ.get('HFRAC', '0.3'))
+H = HFRAC * HS
 QM, QP = q1, 1.5 * q1
 R = QP / QM; PHI = np.degrees(2 * np.arccos(R / 2)); PHI2 = PHI / 2
 NPER = 12
@@ -85,6 +86,22 @@ if __name__ == '__main__':
         d = float(sys.argv[2]); theta = PHI2 + d
         m0, info = seed_field(theta); print('seed', info, flush=True)
         run(f'M1_d{d:+.0f}', m0, extra=dict(delta=d, theta=theta, seed_info=info))
+    elif t == 'M4':
+        # near-saturation rotation scan: E relative to the saturated state (-2H per site), same box/delta set as M1
+        d = float(sys.argv[2]); theta = PHI2 + d; f = (1 - HFRAC) / 0.7
+        us, info = plus_lattice(theta)
+        modes = [(v, 0.6 * f, (0.8, 0.2)) for v in qm_lattice()] + [(u, 0.5 * f, (0.2, 0.8)) for u in us]
+        m0 = llg.modes_to_field(modes, LX, LY, BX, BY, m0=0.85)
+        name = f'M4_h{HFRAC}_d{d:+.0f}'; t0 = time.time()
+        sim = llg.LLG(A, D1, RHO * D1, J / 2, H, 0.0, L=(LX, LY), B=(BX, BY)); sim.set_m(m0)
+        Esat = -2 * H; hist = []
+        for c in range(12):
+            sim.step(2500); r, m = measure(sim); r['step'] = (c + 1) * 2500; r['dE_sat'] = r['E'] - Esat; r['mz'] = sim.mz_mean(); hist.append(r)
+            print(f"  {name} step {r['step']}: E-Esat={r['dE_sat']:.3e} res={r['res']:.1e} mz={np.round(r['mz'],4)} rel={r['rel']} A0={r['A_big']} A+phi={r['A_plus']} A-phi={r['A_minus']}", flush=True)
+            if c >= 2 and abs(hist[-1]['E'] - hist[-2]['E']) < 1e-11 and r['res'] < 1e-7: break
+        np.save(os.path.join(RUNS, 'fields', f'llgM_{name}_m.npy'), m.astype(np.float32))
+        json.dump(dict(name=name, hfrac=HFRAC, H=H, delta=d, theta=theta, seed_info=info, box=[BX, BY, LX, LY], hist=hist, final=hist[-1], Esat=Esat, wall=time.time() - t0),
+                  open(os.path.join(RUNS, f'llgM_{name}.json'), 'w'), indent=1, default=float)
     elif t == 'M2':
         for nm in ('a_triad', 'b_skx2'):
             m0 = np.load(os.path.join(RUNS, 'fields', f'llg_L2_rho1.5_J0.0022_H0.3_{nm}_m.npy')).astype(float)
@@ -107,3 +124,4 @@ if __name__ == '__main__':
         s = int(sys.argv[2]); m0, _ = seed_field(0.0, with_plus=False)
         rng = np.random.default_rng(500 + s); m0[3:6] = rng.normal(size=(3, LX, LY)); m0[5] += 0.5
         run(f'M3_s{s}', m0, extra=dict(seed=s))
+
